@@ -46,6 +46,16 @@ namespace ConsolePath
             return Directory.EnumerateDirectories(filePath);
         }
 
+        /// <summary>
+        /// 取得當前資料夾名稱
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public string GetCurrentFolderName(string filePath)
+        {
+            return new DirectoryInfo(filePath).Name;
+        }
+
         #endregion
 
         #region 檔案複製、寫入、刪除、搬移、判斷存在
