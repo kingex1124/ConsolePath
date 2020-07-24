@@ -112,6 +112,25 @@ namespace ConsolePath
             return File.Exists(filePath);
         }
 
+        /// <summary>
+        /// 取得檔案建立日期
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public DateTime GetFileWriteDateTime(string filePath)
+        {
+            return File.GetLastAccessTime(filePath);
+        }
+
+        /// <summary>
+        /// 取得檔案修改日期
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public DateTime GetFileModifyDateTime(string filePath)
+        {
+            return File.GetLastWriteTime(filePath);
+        }
 
         #endregion
 
