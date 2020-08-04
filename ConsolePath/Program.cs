@@ -132,6 +132,30 @@ namespace ConsolePath
             return File.GetLastWriteTime(filePath);
         }
 
+        /// <summary>
+        /// 取得檔案大小
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public long GetFileSize(string filePath)
+        {
+            return new FileInfo(filePath).Length;
+        }
+
+        /// <summary>
+        /// 取得檔案修改日期
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public DateTime GetFileModifyDate(string filePath)
+        {
+           // 寫法1
+           var result = new FileInfo(filePath).LastWriteTime;
+
+           // 寫法2
+           return File.GetLastWriteTime(filePath);
+        }
+
         #endregion
 
         #region 資料夾 搬移、刪除、建立、判斷存在
