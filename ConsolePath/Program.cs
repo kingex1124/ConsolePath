@@ -59,19 +59,6 @@ namespace ConsolePath
         }
 
         /// <summary>
-        /// 建立檔案、資料夾時所觸發的事件
-        /// 子目錄建檔不算
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void Watcher_Created(object sender, FileSystemEventArgs e)
-        {
-            string fullName = e.FullPath;
-            string changeType = e.ChangeType.ToString();
-            string name = e.Name;
-        }
-
-        /// <summary>
         /// 異動檔案所觸發的事件
         /// 子目錄建檔、刪檔也算，因為異動了資料夾
         /// </summary>
@@ -82,6 +69,35 @@ namespace ConsolePath
             string fullName = e.FullPath;
             string changeType = e.ChangeType.ToString();
             string name = e.Name;
+
+            var dirInfo = new DirectoryInfo(fullName);
+
+            //異動時間
+            DateTime changeTime = dirInfo.LastWriteTime;
+        }
+
+        /// <summary>
+        /// 建立檔案、資料夾時所觸發的事件
+        /// 子目錄建檔不算
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Watcher_Created(object sender, FileSystemEventArgs e)
+        {
+            string fullName = e.FullPath;
+            string changeType = e.ChangeType.ToString();
+            string name = e.Name;
+
+            var dirInfo = new DirectoryInfo(fullName);
+
+            // 建立時間
+            DateTime createTime = dirInfo.CreationTime;
+
+            // 目錄下共有幾個檔案
+            int fileCount = dirInfo.Parent.GetFiles().Length;
+
+            // 目錄下共有幾個資料夾
+            int folderCount = dirInfo.Parent.GetDirectories().Length;
         }
 
         /// <summary>
@@ -95,6 +111,9 @@ namespace ConsolePath
             string fullName = e.FullPath;
             string changeType = e.ChangeType.ToString();
             string name = e.Name;
+
+            // 刪除時間
+            DateTime deleteTime = DateTime.Now;
         }
 
         /// <summary>
@@ -105,9 +124,24 @@ namespace ConsolePath
         /// <param name="e"></param>
         private void Watcher_Renamed(object sender, RenamedEventArgs e)
         {
+            // 更新前的完整路徑
+            string oldFullName = e.OldFullPath;
+
+            // 更新後的完整路徑
             string fullName = e.FullPath;
+
             string changeType = e.ChangeType.ToString();
+
+            // 更新前的名稱
+            string oldName = e.OldName;
+
+            // 更新後的名稱
             string name = e.Name;
+
+            var fileInfo = new FileInfo(fullName);
+
+            // 建立日期
+            DateTime createTime = fileInfo.LastAccessTime;
         }
 
         #endregion
