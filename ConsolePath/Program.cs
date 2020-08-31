@@ -11,8 +11,106 @@ namespace ConsolePath
     {
         static void Main(string[] args)
         {
+            Program pg = new Program();
+            pg.FileFolderChangeEvent(@"C:\Users\011714\Desktop\down");
+
+                Console.ReadKey();
+        }
+
+        #region 資料夾內檔案、子目錄觸發異動事件
+
+        /// <summary>
+        /// 異動資料夾觸發事件
+        /// </summary>
+        /// <param name="folderPath"></param>
+        public void FileFolderChangeEvent(string folderPath)
+        {
+            // 建立一個 FileSystemWatcher 實體，並設定相關屬性
+            FileSystemWatcher watcher = new FileSystemWatcher();
+
+            watcher.Path = folderPath;
+
+            // 設定要監看的變更類型，這裡設定監看最後修改時間與修改檔名的變更事件
+            watcher.NotifyFilter = NotifyFilters.LastAccess
+                                 | NotifyFilters.LastWrite
+                                 | NotifyFilters.FileName
+                                 | NotifyFilters.DirectoryName;
+
+            // 設定要監看的檔案類型
+            // watcher.Filter = "*.txt";
+
+            // 設定是否監看子資料夾 預設是true
+            //watcher.IncludeSubdirectories = false,
+
+            // Add event handlers.
+            watcher.Changed += Watcher_Changed; 
+            watcher.Created += Watcher_Created;
+            watcher.Deleted += Watcher_Deleted; 
+            watcher.Renamed += Watcher_Renamed; 
+
+            // 設定是否啟動元件，必須要設定為 true，否則監看事件是不會被觸發
+            watcher.EnableRaisingEvents = true;
+
+            // 讓程式在迴圈中持續執行.
+            // Console.WriteLine("Press 'q' to quit the sample.");
+            // while (Console.Read() != 'q') ;
+
             Console.ReadKey();
         }
+
+        /// <summary>
+        /// 建立檔案、資料夾時所觸發的事件
+        /// 子目錄建檔不算
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Watcher_Created(object sender, FileSystemEventArgs e)
+        {
+            string fullName = e.FullPath;
+            string changeType = e.ChangeType.ToString();
+            string name = e.Name;
+        }
+
+        /// <summary>
+        /// 異動檔案所觸發的事件
+        /// 子目錄建檔、刪檔也算，因為異動了資料夾
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            string fullName = e.FullPath;
+            string changeType = e.ChangeType.ToString();
+            string name = e.Name;
+        }
+
+        /// <summary>
+        /// 刪除檔案、資料夾所觸發的事件
+        /// 子目錄建檔不算
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Watcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            string fullName = e.FullPath;
+            string changeType = e.ChangeType.ToString();
+            string name = e.Name;
+        }
+
+        /// <summary>
+        /// 更改檔案名稱、資料夾名稱所觸發的事件
+        /// 子目錄建檔不算
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Watcher_Renamed(object sender, RenamedEventArgs e)
+        {
+            string fullName = e.FullPath;
+            string changeType = e.ChangeType.ToString();
+            string name = e.Name;
+        }
+
+        #endregion
 
         #region 取得資料夾下所有檔案、資料夾資訊
 
@@ -364,4 +462,6 @@ namespace ConsolePath
 
         #endregion
     }
-}
+
+
+    }
