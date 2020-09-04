@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ConsolePath
@@ -13,11 +17,13 @@ namespace ConsolePath
         {
             Program pg = new Program();
             pg.FileFolderChangeEvent(@"C:\Users\011714\Desktop\down");
-
-                Console.ReadKey();
+  
+            Console.ReadKey();
         }
 
         #region 資料夾內檔案、子目錄觸發異動事件
+
+        private static Queue<FileSystemEventArgs> _queue = null;
 
         /// <summary>
         /// 異動資料夾觸發事件
@@ -34,7 +40,8 @@ namespace ConsolePath
             watcher.NotifyFilter = NotifyFilters.LastAccess
                                  | NotifyFilters.LastWrite
                                  | NotifyFilters.FileName
-                                 | NotifyFilters.DirectoryName;
+                                 | NotifyFilters.DirectoryName
+                                 | NotifyFilters.CreationTime;
 
             // 設定要監看的檔案類型
             // watcher.Filter = "*.txt";
@@ -42,11 +49,15 @@ namespace ConsolePath
             // 設定是否監看子資料夾 預設是true
             //watcher.IncludeSubdirectories = false,
 
+            _queue = new Queue<FileSystemEventArgs>();
+
             // Add event handlers.
-            watcher.Changed += Watcher_Changed; 
-            watcher.Created += Watcher_Created;
+            watcher.Changed += Watcher_Changed;
+            watcher.Created += Watcher_Created2; //Watcher_Created
             watcher.Deleted += Watcher_Deleted; 
-            watcher.Renamed += Watcher_Renamed; 
+            watcher.Renamed += Watcher_Renamed;
+
+            //WaitForChangedResult res = watcher.WaitForChanged(WatcherChangeTypes.Created, 100000);
 
             // 設定是否啟動元件，必須要設定為 true，否則監看事件是不會被觸發
             watcher.EnableRaisingEvents = true;
@@ -55,7 +66,22 @@ namespace ConsolePath
             // Console.WriteLine("Press 'q' to quit the sample.");
             // while (Console.Read() != 'q') ;
 
-            Console.ReadKey();
+            // 保持程式持續執行
+            while (true)
+            {
+                // 取得資料後 立刻作複製 或是搬移 或是上傳動作
+                if (_queue.Count != 0)
+                {
+                    string fullName = _queue.Dequeue().FullPath;
+                    var fileInfo = new FileInfo(fullName);
+                    while (IsFileLocked(fileInfo))
+                    {
+                    }
+                    fileInfo.CopyTo(@"D:\暫存區\" + Path.GetFileName(fullName));
+                }
+            }
+
+            //Console.ReadKey();
         }
 
         /// <summary>
@@ -90,6 +116,18 @@ namespace ConsolePath
 
             var dirInfo = new DirectoryInfo(fullName);
 
+            var fileInfo = new FileInfo(fullName);
+
+            // 如果在事件中做其他事情，大量檔案的時候，會掉事件。
+            //while (IsFileLocked(fileInfo))
+            //{
+            //}
+            
+            //fileInfo.CopyTo(@"D:\暫存區\"+ Path.GetFileName(fullName));
+
+            //Console.WriteLine(fileInfo.Length);
+            //Console.WriteLine(i++);
+
             // 建立時間
             DateTime createTime = dirInfo.CreationTime;
 
@@ -98,6 +136,49 @@ namespace ConsolePath
 
             // 目錄下共有幾個資料夾
             int folderCount = dirInfo.Parent.GetDirectories().Length;
+        }
+
+        /// <summary>
+        /// 建立檔案、資料夾時所觸發的事件
+        /// 子目錄建檔不算
+        /// 如果在事件中做其他事情，大量檔案的時候，會掉事件,所以此事件只存取內容用
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Watcher_Created2(object sender, FileSystemEventArgs e)
+        {
+            _queue.Enqueue(e);
+        }
+
+        /// <summary>
+        /// 判斷檔案是否被lock
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        private static bool IsFileLocked(FileInfo file)
+        {
+            FileStream stream = null;
+
+            try
+            {
+                stream = file.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //still being written to
+                //or being processed by another thread
+                //or does not exist (has already been processed)
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+
+            //file is not locked
+            return false;
         }
 
         /// <summary>
