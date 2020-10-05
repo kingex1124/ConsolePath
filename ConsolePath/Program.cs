@@ -369,6 +369,16 @@ namespace ConsolePath
            return File.GetLastWriteTime(filePath);
         }
 
+        /// <summary>
+        /// 取得檔案二進位資料
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public Byte[] GetByteArray(string filePath)
+        {
+            return File.ReadAllBytes(filePath);
+        }
+
         #endregion
 
         #region 資料夾 搬移、刪除、建立、判斷存在
