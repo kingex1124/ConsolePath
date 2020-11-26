@@ -519,6 +519,7 @@ namespace ConsolePath
 
         /// <summary>
         /// 取得應用程式所執行的跟目錄
+        /// 使用排程會變成取得系統碟底下的執行路徑 C:\Windows\system32 解法:請使用 GetCurrentPathAndNext()
         /// </summary>
         /// <returns></returns>
         public string GetCurrentPath()
@@ -566,6 +567,7 @@ namespace ConsolePath
 
         /// <summary>
         /// 取得應用程式當前目錄，並多一個\
+        /// 
         /// </summary>
         /// <returns></returns>
         public string GetCurrentPathAndNext()
